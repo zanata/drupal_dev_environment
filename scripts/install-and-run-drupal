@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# Installs drush and and generates a "quick drupal" server ready for testing
+# of tmgmt_zanata and tmgmt_express_checkout.
+# This should not be run with sudo permissions since it will set folder
+# permissions to the current user.
+
+CURRENT_USER=$(whoami)
+
+# I tried messing about trying to get a sample profile with some content, but
+# gave up when commerce_kickstart had a totally unfamiliar admin menu, and
+# tb_sirate_starter had an error when I tried to install it with drush.
+# (it seems there is no basic drupal site with some pages in it for module
+# testing, or it is hard to find).
+
+sudo yum install -y php-drush-drush php-gd
+
+# This is where I created it before, I'm not sure if it has to be in here
+INSTALL_LOCATION=/var/www/html/quick-drupal
+QUICK_DRUPAL_NAME=sample-drupal
+QUICK_DRUPAL_DIR=$INSTALL_LOCATION/$QUICK_DRUPAL_NAME
+sudo mkdir -p $INSTALL_LOCATION
+sudo chown $CURRENT_USER $INSTALL_LOCATION
+
+echo
+cd $INSTALL_LOCATION
+
+if [[ -d $QUICK_DRUPAL_DIR ]]
+then
+  echo "Looks like you already have a quick drupal."
+  echo "  found $QUICK_DRUPAL_DIR."
+  echo "Skipping quick drupal install."
+else
+  echo "No quick drupal found, will try to install quick drupal."
+  echo "Trying to create quick-drupal with 'drush qd'."
+  drush qd $QUICK_DRUPAL_NAME -y --account-name=admin --account-pass=admin
+  echo "The above command can give an error message even if it succeeds."
+  echo " Seems to be a drupal bug."
+fi
+
+#NEW_QUICK_DRUPAL=$(ls $QUICK_DRUPAL_DIR)
+# TODO this will not work properly if there are multiple quick drupals present
+#      so it should detect how many there are and offer a choice or use the
+#      most recent.
+#NEW_QUICK_DRUPAL_DIR=$QUICK_DRUPAL_DIR$NEW_QUICK_DRUPAL
+#echo
+#echo "Quick drupal seems to be at $NEW_QUICK_DRUPAL_DIR."
+
+RUNNING_DRUPAL_DIR=$QUICK_DRUPAL_DIR/drupal
+
+cd $RUNNING_DRUPAL_DIR
+
+
+
+# These should be the modules needed by tmgmt_zanata
+# I think the order of these may be relevant - things may not be enabled if
+# their requirements are not installed when they are installed.
+drush pm-enable admin_menu -y # requires system
+
+# needed by: tmgmt-ui, content source ui, entity source ui, i18n string source
+drush pm-enable rules -y # requires entity tokens, entity api
+
+# required by tmgmt ui, content source ui, entity source ui, i18n string source
+drush pm-enable views_bulk_operations -y # requires entity API, views, chaos tools
+
+# i18n String Source requires tmgmt ui, tmgmt core, entity api, locale, views, chaos tools, views bulk operations, rules, entity tokens, string translation, internationalization, variable
+
+# required by many things related to translation, but none looks like tmgmt
+drush pm-enable i18n -y # assume it is "Internationalization", requires locale and variable
+
+drush pm-enable entity_translation -y # requires locale
+
+drush pm-enable tmgmt -y # core requires entity api, locale, views, chaos tools
+
+# enable modules required for proper usage of TMGMT
+drush pm-enable tmgmt_ui -y
+drush pm-enable tmgmt_node_ui -y
+drush pm-enable tmgmt_file -y
+
+
+drush pm-enable simpletest -y # activate to allow running unit tests
+
+
+sudo drush runserver
+echo
+echo "Server finished running, ready to exit script."

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# This gets code for the "TMGMT Express Checkout", and places it in
+# ~/src/zanata/tmgmt_express_checkout
+#
+# The code exists both in github and on drupal, so this script will aim to add
+# the following remotes:
+#
+# origin  git@github.com:zanata/tmgmt_express_checkout.git
+# drupal  davidmason@git.drupal.org:project/tmgmt_express_checkout.git
+#
+# You may need to change your drupal remote to use your own username (you need
+# a drupal account and appropriate access to this project)
+
+CLONE_LOCATION="$HOME/src/zanata/tmgmt_express_checkout"
+
+if [ -d $CLONE_LOCATION ]
+then
+  echo -e "Directory $CLONE_LOCATION already exists.\nSkipping directory clone."
+else
+  echo "Cloning into $CLONE_LOCATION."
+  git clone git@github.com:zanata/tmgmt_express_checkout.git $CLONE_LOCATION
+  echo "Adding remote drupal"
+  (cd $CLONE_LOCATION && git remote add drupal davidmason@git.drupal.org:project/tmgmt_express_checkout.git)
+fi

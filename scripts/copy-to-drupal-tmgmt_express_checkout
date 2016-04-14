@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# This script copies tmgmt_express_checkout code into the drupal module
+# directory, including disabling and re-enabling the module so that the
+# operation is safe while the server is running.
+
+# TODO this duplicates code in the similar script for tmgmt_zanata.
+
+QUICK_DRUPAL_PARENT=/var/www/html/quick-drupal/
+QUICK_DRUPAL=$(ls $QUICK_DRUPAL_PARENT)
+if [[ $QUICK_DRUPAL == "" ]]
+then
+  echo "No quick drupal found, nowhere to copy the module to."
+  echo "Terminating (I give up)."
+  exit 1
+fi
+
+QUICK_DRUPAL_DIR=$QUICK_DRUPAL_PARENT$QUICK_DRUPAL/drupal
+ZANATA_MODULE_DIR=$QUICK_DRUPAL_DIR/sites/all/modules/tmgmt_express_checkout/
+mkdir -p $ZANATA_MODULE_DIR
+
+echo "Using drupal at $QUICK_DRUPAL_DIR"
+
+cd $QUICK_DRUPAL_DIR
+drush pm-disable tmgmt_express_checkout -y
+cp -r $HOME/src/zanata/tmgmt_express_checkout/tmgmt* $ZANATA_MODULE_DIR
+drush pm-enable tmgmt_express_checkout -y

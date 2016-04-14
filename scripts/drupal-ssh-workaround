@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# drupal.org has not updated to use a more recent algorithm. This line will
+# enable the old algorithm in the current shell so that git can work.
+#
+# Best not do this globally since you should use better algorithms when they are
+# available.
+
+export GIT_SSH_COMMAND='ssh -o KexAlgorithms=+diffie-hellman-group1-sha1'

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# This script copies tmgmt_zanata code into the drupal module directory,
+# including disabling and re-enabling the module so that the operation is safe
+# while the server is running.
+
+# TODO this duplicates some code in the drupal setup install script, look at
+#      some reuse instead.
+# I have standardized the directory names for quick-drupal so this can be
+# replaced with hard-coded values, see the drupal install script.
+QUICK_DRUPAL_PARENT=/var/www/html/quick-drupal/
+
+# FIXME this breaks when there are multiple drupal installs under quick-drupal
+#       make it just use the first one, or let the user choose, or whatever.
+#       (could have a remembered choice, remembered from some config).
+QUICK_DRUPAL=$(ls $QUICK_DRUPAL_PARENT)
+if [[ $QUICK_DRUPAL == "" ]]
+then
+  echo "No quick drupal found, nowhere to copy the module to."
+  echo "Terminating (I give up)."
+  exit 1
+fi
+
+QUICK_DRUPAL_DIR=$QUICK_DRUPAL_PARENT$QUICK_DRUPAL/drupal
+ZANATA_MODULE_DIR=$QUICK_DRUPAL_DIR/sites/all/modules/tmgmt_zanata/
+mkdir -p $ZANATA_MODULE_DIR
+
+echo "Using drupal at $QUICK_DRUPAL_DIR"
+
+cd $QUICK_DRUPAL_DIR
+drush pm-disable tmgmt_zanata -y
+cp -r $HOME/src/zanata/tmgmt_zanata/tmgmt* $ZANATA_MODULE_DIR
+drush pm-enable tmgmt_zanata -y
