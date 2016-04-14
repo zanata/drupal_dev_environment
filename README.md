@@ -28,6 +28,8 @@ Run this at the start of each development session:
 ```
 scripts/install-and-run-drupal
 ```
+*Note: Installation on RHEL6 will require a Red Hat Network Subscription,
+to acquire the necessary packages*
 
 This script installs the Drupal management tool "drush", then uses it to set
 up a Drupal install, start the Drupal server and add all the modules needed by
