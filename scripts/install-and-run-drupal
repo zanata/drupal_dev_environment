@@ -80,6 +80,9 @@ drush pm-enable tmgmt_file -y
 
 drush pm-enable simpletest -y # activate to allow running unit tests
 
+# direct dependency, needed for http requests
+drush pm-enable chr -y
+
 
 sudo drush runserver
 echo
